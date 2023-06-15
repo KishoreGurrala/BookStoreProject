@@ -1,0 +1,70 @@
+package com.cart.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.cart.client.CustomerFeignClient;
+import com.cart.dto.Customer;
+import com.cart.entity.Cart;
+import com.cart.entity.CartItems;
+import com.cart.service.CartItemsService;
+import com.cart.service.CartService;
+
+@RestController
+@RequestMapping("/cart")
+public class CartController {
+
+	@Autowired
+	private CartService cartService;
+
+	@Autowired
+	private CustomerFeignClient customerFeignClient;
+
+	@Autowired
+	private CartItemsService cartItemsService;
+
+	@GetMapping("/getCustomer")
+	public List<Customer> getcustomers() {
+		List<Customer> customer = customerFeignClient.getCustomers();
+		return customer;
+	}
+
+	@GetMapping("/getCartItems/{customerId}")
+	public List<CartItems> getCustomer(@PathVariable int customerId) {
+
+		List<CartItems> list = cartService.getCart(customerId);
+		return list;
+	}
+
+	@PostMapping("/addCart")
+	public ResponseEntity<?> addToCart(@RequestBody Cart cart) {
+		cartService.addToCart(cart);
+		return new ResponseEntity<>("Cart Items added successfully.", HttpStatus.CREATED);
+	}
+	
+	
+	@GetMapping("/deleteBook/{customerId}/{bookId}")
+	public String deleteCartItem(@PathVariable("customerId") int customerId,@PathVariable("bookId") int bookId){
+		
+		cartService.deleteBook(customerId, bookId);
+		
+		return "cart item deleted";
+	}
+
+	/*
+	 * @GetMapping("/getTotalPrice/{customerId}") public ResponseEntity<?>
+	 * getTotalPrice(@PathVariable int customerId) { float price =
+	 * cartService.getTotalPrice(customerId); return new
+	 * ResponseEntity<>("Total price is " + price + "", HttpStatus.CREATED); }
+	 */
+
+}

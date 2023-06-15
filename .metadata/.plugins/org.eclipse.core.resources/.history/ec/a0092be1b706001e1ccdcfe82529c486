@@ -1,0 +1,35 @@
+package com.order.service;
+
+import java.util.Date;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.order.dao.OrderRepository;
+import com.order.entity.Orders;
+
+@Service
+public class OrdersService {
+
+	@Autowired
+	private OrderRepository orderRepository;
+
+	public List<Orders> getOrders() {
+		List<Orders> list = orderRepository.findAll();
+		return list;
+
+	}
+
+	public void addOrder(int customerId, float price) {
+
+		Orders o = new Orders();
+
+		o.setCustomerId(customerId);
+		o.setTotalPrice(price);
+		o.setOrderDate(new Date());
+
+		orderRepository.save(o);
+
+	}
+}

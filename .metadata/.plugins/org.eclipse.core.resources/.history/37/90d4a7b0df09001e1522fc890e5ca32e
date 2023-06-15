@@ -1,0 +1,122 @@
+package com.cart.service;
+
+import java.util.Iterator;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.cart.client.BookFeignClient;
+import com.cart.dao.CartItemsRepository;
+import com.cart.dao.CartRepository;
+import com.cart.dto.Book;
+import com.cart.entity.Cart;
+import com.cart.entity.CartItems;
+import com.cart.exceptions.CartNotFoundException;
+
+@Service
+public class CartService {
+
+	@Autowired
+	private CartRepository cartRepository;
+
+	@Autowired
+	private CartItemsRepository cartItemsRepository;
+	
+	@Autowired
+	private BookFeignClient bookFeignClient;
+
+
+	// To get the cart Items
+	public Cart getCart(String email) {
+
+		Cart c = cartRepository.findById(email)
+				.orElseThrow(() -> new CartNotFoundException("No cart items found with the Id: " + email));
+		/* List<CartItems> list = c.getItems(); */
+		return c;
+	}
+
+	// To add the book into the cart
+	public void addToCart1(String email,String bookId,int quantity) {
+		CartService cartService = new CartService();
+		float totalPrice = 0f;
+		Cart cart = new Cart();
+		Book book = bookFeignClient.getBook(bookId);
+		System.out.println(book);
+		cart.setEmail(email);
+		CartItems cartItems=new CartItems();
+		cartItems.setBookId(Integer.valueOf(book.getBookId()));
+		cartItems.setBookPrice(book.getPrice());
+		cartItems.setBookTitle(book.getTitle());
+		cartItems.setQuantity(quantity);
+		cartItems.setBookAuthor(book.getAuthor());
+		
+		
+		
+		try {
+			Cart c = cartRepository.findById(cart.getEmail()).get();
+			cartItems.setCart(c);
+			c.getItems().add(cartItems);
+			totalPrice += c.getPrice();
+			totalPrice += (float)(cartItems.getBookPrice()* cartItems.getQuantity());
+			c.setPrice(totalPrice);
+			cartRepository.save(c);
+
+		} catch (Exception e) {
+			totalPrice += (float)(cartItems.getBookPrice()* cartItems.getQuantity());
+			cartItems.setCart(cart);
+			cart.getItems().add(cartItems);
+			cart.setPrice(totalPrice);
+			cartRepository.save(cart);
+		}
+	}
+
+	// To get the total price
+	public float getTotalPrice(List<CartItems> items) {
+		float price = 0f;
+
+		Iterator<CartItems> iterator = items.iterator();
+		while (iterator.hasNext()) {
+			CartItems item = iterator.next();
+			price += (float) (item.getBookPrice() * item.getQuantity());
+		}
+		return price;
+	}
+
+	// To delete books from the cart
+	public Cart deleteBook(String email,Integer bid) {
+		float price = 0f;
+		Cart c = cartRepository.findById(email)
+				.orElseThrow(() -> new CartNotFoundException("No cart items found with the Id: " + email));
+
+		List<CartItems> items = c.getItems();
+		Iterator<CartItems> iterator = items.iterator();
+		while (iterator.hasNext()) {
+			CartItems item = iterator.next();
+
+			if (item.getBookId() == (bid)) {
+
+				price += (float) (item.getBookPrice() * item.getQuantity());
+				iterator.remove();
+			}
+		}
+		float totalPrice = c.getPrice() - price;
+		c.setPrice(totalPrice);
+		cartRepository.save(c);
+		return c;
+	}
+
+	// To remove whole cart
+	public String removeCart(String email) {
+
+		try {
+			cartRepository.deleteById(email);
+		} catch (Exception e) {
+
+			throw new CartNotFoundException("No cart items found with the Id: " + email);
+		}
+
+		return "done";
+
+	}
+}

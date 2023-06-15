@@ -1,0 +1,77 @@
+package com.book.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.book.entity.Book;
+import com.book.service.BookService;
+
+@RestController
+@RequestMapping("/book")
+public class BookController {
+
+	@Autowired
+	private BookService bookService;
+
+	// To add book
+	@PostMapping("/addbook")
+	public ResponseEntity<?> addbook(@RequestBody Book book) {
+		return new ResponseEntity<>("Book added successfully.", HttpStatus.CREATED);
+	}
+
+	// To get all the books available
+	@GetMapping("/getAllBooks")
+	public List<Book> getBooks() {
+
+		List<Book> list = bookService.getBooks();
+		return list;
+	}
+
+	// To get Book using bookId
+	@GetMapping("/getBook/{bookId}")
+	public Book getBookQuantity(@PathVariable("bookId") String bookId) {
+
+		return bookService.getBookById(bookId);
+	}
+
+	// To update Book quantity
+	@PutMapping("/updateBook/{bookId}/{quantity}")
+	public ResponseEntity<?> updateBookQuantity(@PathVariable("bookId") String bookId,
+			@PathVariable("quantity") int quantity) {
+		Book book = bookService.updateBookQuantity(bookId);
+		book.setQuantity(quantity);
+		bookService.addBook(book);
+		return new ResponseEntity<>("Quantity updated successfully.", HttpStatus.CREATED);
+	}
+
+	// To delete book using id
+	@GetMapping("/deleteBook/{bookId}")
+	public ResponseEntity<?> deleteBook(@PathVariable("bookId") String bookId) {
+		bookService.deleteBook(bookId);
+		return new ResponseEntity<>("Book deleted successfully.", HttpStatus.CREATED);
+	}
+
+	// To manage quantity of book after placing order
+	@GetMapping("/quantityManager/{bookId}/{quantity}")
+	public String quantityManager(@PathVariable("bookId") String bookid, @PathVariable("quantity") int quantity) {
+
+		bookService.quantityManager(bookid, quantity);
+		return "Success";
+	}
+	/*
+	 * @GetMapping("/checkBookQuantity/{book_id}") public Integer
+	 * checkBookQuantity(@PathVariable("book_id") int bookId) {
+	 * 
+	 * return bookService.checkBookQuantity(bookId); }
+	 */
+}

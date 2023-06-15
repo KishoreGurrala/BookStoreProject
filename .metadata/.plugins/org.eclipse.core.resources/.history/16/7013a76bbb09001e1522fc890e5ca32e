@@ -1,0 +1,17 @@
+package com.order.client;
+
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
+import com.order.dto.Cart;
+
+@FeignClient(name = "CartMicroservice", url="http://localhost:8383")
+public interface CartFeignClient {
+	
+	@GetMapping("/cart/removeCart")
+	public String removeCart();
+	
+	@GetMapping("/cart/getCartItems")
+	public Cart getCart(String email);
+}

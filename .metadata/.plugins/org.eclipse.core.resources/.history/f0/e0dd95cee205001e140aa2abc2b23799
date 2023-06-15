@@ -1,0 +1,72 @@
+package com.cart.service;
+
+import java.util.Iterator;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.cart.dao.CartRepository;
+import com.cart.entity.Cart;
+import com.cart.entity.CartItems;
+import com.cart.exceptions.CartNotFoundException;
+
+@Service
+public class CartService {
+
+	@Autowired
+	private CartRepository cartRepository;
+
+	public List<CartItems> getCart(int customerId) {
+
+		Cart c = cartRepository.findById(customerId)
+				.orElseThrow(() -> new CartNotFoundException("No cart items found with the Id: " + customerId));
+		List<CartItems> list = c.getItems();
+		return list;
+	}
+
+	public void addToCart(Cart cart) {
+		CartService cartService = new CartService();
+
+		try {
+			Cart c = cartRepository.findById(cart.getCustomerId()).get();
+			c.getItems().addAll(cart.getItems());
+			cartRepository.save(c);
+
+		} catch (Exception e) {
+			  cartRepository.save(cart);
+		}
+	}
+
+	public float getTotalPrice(int customerId,List<CartItems> list) {
+		float price = 0f;
+		
+		Cart c = cartRepository.findById(customerId)
+				.orElseThrow(() -> new CartNotFoundException("No cart items found with the Id: " + customerId));
+
+		List<CartItems> items = c.getItems();
+
+		for (CartItems item : items) {
+			price = price + (float) (item.getBookPrice() * item.getQuantity());
+		}
+		return price;
+	}
+
+	public Cart deleteBook(int customerId, Integer bid) {
+		Cart c = cartRepository.findById(customerId)
+				.orElseThrow(() -> new CartNotFoundException("No cart items found with the Id: " + customerId));
+
+		List<CartItems> items = c.getItems();
+		Iterator<CartItems> iterator = items.iterator();
+		while (iterator.hasNext()) {
+			CartItems item = iterator.next();
+
+			if (item.getBookId() == (bid)) {
+
+				iterator.remove();
+			}
+		}
+		cartRepository.save(c);
+		return c;
+	}
+}

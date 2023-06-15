@@ -1,0 +1,24 @@
+package com.order.entity;
+
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class OrderItems {
+	
+	@Id
+	private int customerId;
+	private int itemId;
+	private String bookTitle;
+	private String bookAuthor;
+	private float bookPrice;
+	private Integer quantity;
+	private int bookId;
+}

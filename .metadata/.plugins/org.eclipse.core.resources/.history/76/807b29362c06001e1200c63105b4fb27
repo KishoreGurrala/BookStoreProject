@@ -1,0 +1,20 @@
+package com.order.service;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.order.dao.OrderItemsRepository;
+import com.order.dto.CartItems;
+
+@Service
+public class OrderItemsService {
+	
+	@Autowired
+	private OrderItemsRepository orderItemsRepository;
+	
+	public void addOrderItems(List<CartItems> item) {
+		
+	}
+}

@@ -1,0 +1,16 @@
+package com.cart.client;
+
+import java.util.List;
+
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
+import com.cart.dto.Customer;
+
+@FeignClient(name = "CustomerMicroservice" , url="http://localhost:8181")
+public interface CustomerFeignClient {
+	
+	@GetMapping("/customer/getCustomer/{id}")
+	public Customer getCustomers(@PathVariable("id") int id);
+}

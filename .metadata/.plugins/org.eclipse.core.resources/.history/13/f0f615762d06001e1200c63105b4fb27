@@ -1,0 +1,34 @@
+package com.order.entity;
+
+
+
+import java.util.Date;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+import org.hibernate.annotations.GenericGenerator;
+
+import lombok.Data;
+
+@Data
+@Entity
+@Table(name = "Orders_table")
+public class Orders {
+	
+	@Id
+	@GeneratedValue(generator = "uuid")
+	@GenericGenerator(name = "uuid", strategy = "uuid")
+	@Column(name = "uuid", unique = true)
+	private String orderId;
+	
+	private Integer customerId;
+	
+	private Date orderDate;
+	
+	private float totalPrice;
+
+}

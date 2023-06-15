@@ -1,0 +1,19 @@
+package com.order.dto;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.Id;
+
+
+
+public class Cart  {
+	
+	private Integer customerId;
+	
+	private float price;
+	
+	
+	private List<CartItems> items = new ArrayList<CartItems>();
+
+}

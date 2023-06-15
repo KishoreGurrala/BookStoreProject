@@ -1,0 +1,57 @@
+package com.customer.service;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+
+import com.customer.dao.CustomerRepository;
+import com.customer.entity.Customer;
+import com.customer.exception.CustomerNotFoundException;
+
+@Service
+public class CustomerService {
+	@Autowired
+	private CustomerRepository customerRepository;
+
+	@Autowired
+	private PasswordEncoder passwordEncoder;
+	
+	@Autowired
+	private JwtService jwtService;
+	
+	
+	//Registering customer
+	public String addCustomer(Customer customer) {
+		customer.setPassword(passwordEncoder.encode(customer.getPassword()));
+		customerRepository.save(customer);
+		return "Customer Added Succesfully";
+	}
+	
+	
+	//for generating token
+	public String generateToken(String gmail) {
+		return jwtService.generateToken(gmail);
+	}
+	
+	//Validating token
+	public void validatetoken(String token) {
+		jwtService.validateToken(token);  
+	}
+	public List<Customer> getCustomers() {
+		List<Customer> list = customerRepository.findAll();
+		return list;
+	}
+	
+	//To get customer data with customerID.
+	public Customer getCustomer(Integer id) {
+		Customer customer;
+
+		customer = customerRepository.findById(id)
+				.orElseThrow(() -> new CustomerNotFoundException("No customer found with the Id: " + id));
+		return customer;
+	}
+
+}

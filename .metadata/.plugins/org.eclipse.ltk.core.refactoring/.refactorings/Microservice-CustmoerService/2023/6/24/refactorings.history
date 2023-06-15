@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Copy element &apos;JwtService.java&apos; to &apos;ApiGateway/src/main/java/com.order.util&apos;&#x0D;&#x0A;- Original project: &apos;Microservice-CustmoerService&apos;&#x0D;&#x0A;- Destination element: &apos;ApiGateway/src/main/java/com.order.util&apos;&#x0D;&#x0A;- Original element: &apos;com.customer.service.JwtService.java&apos;" description="Copy compilation unit" destination="=ApiGateway/src\/main\/java=/optional=/true=/=/maven.pomderived=/true=/&lt;com.order.util" element1="/src\/main\/java=/optional=/true=/=/maven.pomderived=/true=/&lt;com.customer.service{JwtService.java" files="0" flags="589830" folders="0" id="org.eclipse.jdt.ui.copy" policy="org.eclipse.jdt.ui.copyResources" stamp="1686582523020" units="1" version="1.0"/>
+</session>

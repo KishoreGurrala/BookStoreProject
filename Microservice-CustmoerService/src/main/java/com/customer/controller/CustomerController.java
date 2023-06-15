@@ -1,0 +1,112 @@
+package com.customer.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.customer.client.BookFeignClient;
+import com.customer.client.OrderClient;
+import com.customer.dto.Book;
+import com.customer.entity.Customer;
+import com.customer.entity.Login;
+import com.customer.exception.CustomerNotFoundException;
+import com.customer.service.CustomerService;
+
+@RestController
+@RequestMapping("/customer")
+public class CustomerController {
+
+	@Autowired
+	private CustomerService customerService;
+
+	@Autowired
+	private AuthenticationManager authenticationManager;
+
+	@Autowired
+	private OrderClient orderClient;
+
+	@Autowired
+	private BookFeignClient bookFeignClient;
+
+	// To register the new customer.
+	@PostMapping("/register")
+	public ResponseEntity<?> registerCustomer(@RequestBody Customer customer) {
+		String msg = customerService.addCustomer(customer);
+		return new ResponseEntity<>(msg, HttpStatus.CREATED);
+	}
+
+	// To login and create the token
+	@PostMapping("/login")
+	public String getEmployee(@RequestBody Login login) {
+		try {
+
+			this.authenticationManager
+					.authenticate(new UsernamePasswordAuthenticationToken(login.getEmail(), login.getPassword()));
+			return customerService.generateToken(login.getEmail());
+		} catch (UsernameNotFoundException e) {
+			throw new CustomerNotFoundException("Wrong gmail or Password");
+		} catch (BadCredentialsException e) {
+			throw new CustomerNotFoundException("You entered Wrong Password");
+		} catch (InternalAuthenticationServiceException e) {
+			e.printStackTrace();
+			throw new CustomerNotFoundException("User Not Found With This Email :" + login.getEmail());
+		}
+
+	}
+
+	// To validate the token
+	@GetMapping("/validate")
+	public String validateToken(@RequestParam("token") String token) {
+		customerService.validatetoken(token);
+		return "Token is valid";
+	}
+
+	// To get the data of all customers
+	@GetMapping("/getCustomers")
+	public List<Customer> getCustomers() {
+
+		List<Customer> list = customerService.getCustomers();
+		return list;
+
+	}
+
+	// To get the customer data using customerId
+	@GetMapping("/getCustomer")
+	public Customer getCustomer(@RequestHeader("userEmail")  String Email) {
+
+		Customer customer = customerService.getCustomer((Email));
+		return customer;
+
+	}
+
+	// To retrieve all the books
+	@GetMapping("/books")
+	public List<Book> getBooks() {
+
+		List<Book> books = bookFeignClient.getBooks();
+		return books;
+	}
+
+	// To make the order
+	@GetMapping("/order")
+	public String makeOrder(@RequestHeader("userEmail")  String email) {
+
+		String msg = orderClient.makeOrder(email);
+		return msg;
+	}
+}

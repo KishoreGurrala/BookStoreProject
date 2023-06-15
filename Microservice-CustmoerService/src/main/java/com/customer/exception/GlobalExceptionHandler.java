@@ -1,0 +1,30 @@
+package com.customer.exception;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+
+import com.customer.exception.payload.ApiResponse;
+
+@ControllerAdvice
+public class GlobalExceptionHandler {
+	
+	//Handling CustomerNotFoundException and giving response 
+	@ExceptionHandler(CustomerNotFoundException.class)
+	public ResponseEntity<ApiResponse> handleCustomException(CustomerNotFoundException e) {
+		// Handle the custom exception here
+		// You can customize the response based on the exception
+		String msg = e.getMessage();
+		ApiResponse resp = ApiResponse.builder().message(msg).success(true).status(HttpStatus.NOT_FOUND).build();
+		return new ResponseEntity<ApiResponse>(resp, HttpStatus.NOT_FOUND);
+	}
+
+	/*
+	 * @ExceptionHandler(Exception.class) public ResponseEntity<String>
+	 * handleException(Exception e) { // Handle other exceptions here // You can
+	 * customize the response based on the exception return
+	 * ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).
+	 * body("Internal Server Error"); }
+	 */
+}

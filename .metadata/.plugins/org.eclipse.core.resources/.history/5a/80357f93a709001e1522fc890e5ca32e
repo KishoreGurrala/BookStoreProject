@@ -1,0 +1,104 @@
+package com.cart.service;
+
+import java.util.Iterator;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+
+import com.cart.dao.CartItemsRepository;
+import com.cart.dao.CartRepository;
+import com.cart.entity.Cart;
+import com.cart.entity.CartItems;
+import com.cart.exceptions.CartNotFoundException;
+
+@Service
+public class CartService {
+
+	@Autowired
+	private CartRepository cartRepository;
+	
+	@Autowired
+	private CartItemsRepository cartItemsRepository;
+
+	public Cart getCart(int customerId) {
+
+		Cart c = cartRepository.findById(customerId)
+				.orElseThrow(() -> new CartNotFoundException("No cart items found with the Id: " + customerId));
+		/* List<CartItems> list = c.getItems(); */
+		return c;
+	}
+	
+	//To add the book into the cart
+	public void addToCart(Cart cart) {
+		CartService cartService = new CartService();
+		float totalPrice = 0f;
+
+		try {
+			Cart c = cartRepository.findById(cart.getCustomerId()).get();
+			c.getItems().addAll(cart.getItems());
+			totalPrice+= c.getPrice();
+			totalPrice += cartService.getTotalPrice(cart.getItems());
+			c.setPrice(totalPrice);
+			cartRepository.save(c);
+
+		} catch (Exception e) {
+			
+			totalPrice += cartService.getTotalPrice(cart.getItems());
+			cartRepository.save(cart);
+		}
+	}
+
+	//To get the total price
+	public float getTotalPrice(List<CartItems> items) {
+		float price = 0f;
+		
+		Iterator<CartItems> iterator = items.iterator();
+		while (iterator.hasNext()) {
+			CartItems item = iterator.next();
+			price += (float) (item.getBookPrice() * item.getQuantity());
+		}
+		return price;
+	}
+	
+	//To delete books from the cart
+	public Cart deleteBook(int customerId, Integer bid) {
+		float price = 0f;
+		Cart c = cartRepository.findById(customerId)
+				.orElseThrow(() -> new CartNotFoundException("No cart items found with the Id: " + customerId));
+
+		List<CartItems> items = c.getItems();
+		Iterator<CartItems> iterator = items.iterator();
+		while (iterator.hasNext()) {
+			CartItems item = iterator.next();
+
+			if (item.getBookId() == (bid)) {
+				
+				price += (float) (item.getBookPrice() * item.getQuantity());
+				iterator.remove();
+			}
+		}
+		float totalPrice = c.getPrice() - price;
+		c.setPrice(totalPrice);
+		cartRepository.save(c);
+		return c;
+	}
+	
+	
+	//To remove whole cart
+	public String removeCart(int customerId) {
+		
+		
+		try {
+			  cartRepository.deleteById(customerId);	
+		}
+		catch(Exception e) {
+
+			throw new CartNotFoundException("No cart items found with the Id: " + customerId);
+		}
+		
+		return "done";
+		
+	}
+}
